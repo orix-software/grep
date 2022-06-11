@@ -1,0 +1,38 @@
+
+;----------------------------------------------------------------------
+;
+;----------------------------------------------------------------------
+SDK::_str_label_ .set 0
+SDK::_inline_ .set 0
+
+;----------------------------------------------------------------------
+;
+;----------------------------------------------------------------------
+.macro prints str
+	.local @suite
+
+	lda	#<.ident(.sprintf("_str%d", SDK::_str_label_))
+	ldy	#>.ident(.sprintf("_str%d", SDK::_str_label_))
+
+	.byte	$00, XWSTR0
+
+	.if SDK::_inline_
+		jmp	@suite
+
+		.ident(.sprintf("_str%d", SDK::_str_label_)):
+
+			.asciiz	str
+
+	.else
+		.pushseg
+			.segment "RODATA"
+				.ident(.sprintf("_str%d", SDK::_str_label_)):
+					.asciiz	str
+		.popseg
+	.endif
+
+	SDK::_str_label_ .set SDK::_str_label_ +1
+
+	@suite:
+
+.endmacro
