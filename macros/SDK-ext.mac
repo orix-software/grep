@@ -1,38 +1,42 @@
 
-;----------------------------------------------------------------------
-;
-;----------------------------------------------------------------------
-SDK::_str_label_ .set 0
-SDK::_inline_ .set 0
+.ifndef SDK_VERSION
 
-;----------------------------------------------------------------------
-;
-;----------------------------------------------------------------------
-.macro prints str
-	.local @suite
+	;----------------------------------------------------------------------
+	;
+	;----------------------------------------------------------------------
+	SDK::_str_label_ .set 0
+	SDK::_inline_ .set 0
 
-	lda	#<.ident(.sprintf("_str%d", SDK::_str_label_))
-	ldy	#>.ident(.sprintf("_str%d", SDK::_str_label_))
+	;----------------------------------------------------------------------
+	;
+	;----------------------------------------------------------------------
+	.macro prints str
+		.local @suite
 
-	.byte	$00, XWSTR0
+		lda	#<.ident(.sprintf("_str%d", SDK::_str_label_))
+		ldy	#>.ident(.sprintf("_str%d", SDK::_str_label_))
 
-	.if SDK::_inline_
-		jmp	@suite
+		.byte	$00, XWSTR0
 
-		.ident(.sprintf("_str%d", SDK::_str_label_)):
+		.if SDK::_inline_
+			jmp	@suite
 
-			.asciiz	str
+			.ident(.sprintf("_str%d", SDK::_str_label_)):
 
-	.else
-		.pushseg
-			.segment "RODATA"
-				.ident(.sprintf("_str%d", SDK::_str_label_)):
-					.asciiz	str
-		.popseg
-	.endif
+				.asciiz	str
 
-	SDK::_str_label_ .set SDK::_str_label_ +1
+		.else
+			.pushseg
+				.segment "RODATA"
+					.ident(.sprintf("_str%d", SDK::_str_label_)):
+						.asciiz	str
+			.popseg
+		.endif
 
-	@suite:
+		SDK::_str_label_ .set SDK::_str_label_ +1
 
-.endmacro
+		@suite:
+
+	.endmacro
+
+.endif

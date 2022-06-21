@@ -15,7 +15,11 @@
 ;----------------------------------------------------------------------
 ;			include application
 ;----------------------------------------------------------------------
-.include "macros/SDK-ext.mac"
+.ifndef SDK_VERSION
+	.include "macros/SDK-ext.mac"
+.else
+	.out "\tYou can remove macros/SDK-ext.mac from your project"
+.endif
 .include "include/grep.inc"
 
 ;----------------------------------------------------------------------

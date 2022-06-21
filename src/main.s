@@ -20,7 +20,12 @@ XGETARGV = $2E
 ;----------------------------------------------------------------------
 ;			include application
 ;----------------------------------------------------------------------
-.include "macros/SDK-ext.mac"
+.ifndef SDK_VERSION
+	.include "macros/SDK-ext.mac"
+.else
+	.out "\tYou can remove macros/SDK-ext.mac from your project"
+.endif
+
 .include "include/grep.inc"
 
 ;----------------------------------------------------------------------
@@ -66,8 +71,6 @@ MAX_CMDLINE_SIZE = 128
 		; Sauvegarde ligne de commande
 		unsigned char cmdline[MAX_CMDLINE_SIZE]
 
-		; unsigned short _argv
-		; unsigned char _argc
 		unsigned char retvalue
 
 		unsigned char stop_char
@@ -175,6 +178,7 @@ MAX_CMDLINE_SIZE = 128
 		pha
 
 		prints	"Unknown option: -"
+
 		; Affiche le paramètre inconnu
 		pla
 		cputc
@@ -309,42 +313,6 @@ MAX_CMDLINE_SIZE = 128
 		;ldy	#$00
 		;rts
 
-.if 0
-	get_args:
-		initmainargs _argv, _argc
-		;dec	_argc
-		;bne	main
-		cpx	#03
-		beq	main
-
-		print	noarg_msg
-
-		mfree	(_argv)
-
-		; Exit(2)
-		lda	#$02
-		ldy	#$00
-		rts
-
-	main:
-		getmainarg #1, (_argv), str
-		ldy	#$00
-	loop:
-		lda	(str),y
-		sta	pattern,y
-		beq	arg2
-		iny
-		bne	loop
-
-	arg2:
-		getmainarg #2, (_argv), filename
-
-		fopen	(filename), O_RDONLY
-		sta	fp
-		stx	fp+1
-		eor	fp+1
-		beq	open_error
-.endif
 	go:
 		jsr	cmnd_grep
 		sta	retvalue
@@ -365,72 +333,12 @@ MAX_CMDLINE_SIZE = 128
 
 	exit_ret:
 		fclose	(fp)
-		; mfree	(_argv)
 
 		; Exit(retvalue)
 		lda	retvalue
 		ldy	#$00
 		rts
 
-.if 0
-	main:
-		getmainarg #1, (_argv), str
-		ldy	#$00
-	loop:
-		lda	(str),y
-		sta	pattern,y
-		beq	arg2
-		iny
-		bne	loop
-
-	arg2:
-		getmainarg #2, (_argv), str
-
-		; print	(str)
-
-		jsr	pattern_match
-		; jsr	PrintRegs
-		bcc	failed
-
-		iny
-		sty	argn
-		jsr	display
-
-	failed:
-		crlf
-		ldy	#$00
-	loop1:
-		jsr	find
-		bcc	end
-		; jsr	PrintRegs
-		stx	argn
-		sty	argn+1
-		jsr	display
-		ldy	argn+1
-		jmp	loop1
-
-	end:
-		mfree	(_argv)
-
-		rts
-
-	.proc	display
-			crlf
-			print	(str)
-			crlf
-			ldy	argn
-			beq	disp_cursor
-		loop1:
-			cputc	' '
-			dey
-			bne	loop1
-
-		disp_cursor:
-			cputc	'^'
-			crlf
-			rts
-	.endproc
-.endif
 .endproc
 
 
